@@ -7,6 +7,9 @@
     @case('password')
     <x-form.input :props="$field" />
     @break
+    @case('select')
+    <x-form.select :props="$field" />
+    @break
     @endswitch
     @endforeach
     @if(empty($form['buttons']))

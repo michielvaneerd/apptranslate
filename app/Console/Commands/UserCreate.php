@@ -35,6 +35,7 @@ class UserCreate extends Command
         $user = User::create([
             'email' => $email,
             'password' => $password,
+            'email_verified_at' => now(),
             'role' => $role,
             'tfa_secret' => User::generateSecretTfaKey(),
         ]);

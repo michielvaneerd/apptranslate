@@ -5,17 +5,18 @@ declare(strict_types=1);
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use PragmaRX\Google2FA\Google2FA;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 
 class User extends Authenticatable
 {
@@ -37,6 +38,9 @@ class User extends Authenticatable
         'tfa_secret',
         'role',
         'tfa_secret_verified_at',
+        'email_verified_at',
+        'email_token',
+        'email_token_created_at',
     ];
 
     /**
@@ -58,6 +62,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'tfa_secret_verified_at' => 'datetime',
+        'email_token_created_at' => 'datetime',
         'password' => 'hashed',
         'tfa_secret' => 'encrypted',
     ];
@@ -65,6 +70,11 @@ class User extends Authenticatable
     public static function hashProperty(string $value): string
     {
         return hash('sha256', $value);
+    }
+
+    public static function createToken(): string
+    {
+        return Str::random(48);
     }
 
     protected function email(): Attribute
@@ -98,6 +108,7 @@ class User extends Authenticatable
             new SvgImageBackEnd()
         );
         $writer = new Writer($renderer);
+
         return $writer->writeString($url);
     }
 
