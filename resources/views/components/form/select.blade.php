@@ -8,7 +8,7 @@
         placeholder="{{ $placeholder ?? '' }}"
         @if(!empty($required)) required @endif @if(!empty($autofocus)) autofocus @endif>
     @foreach($options as $option)
-    <option value="{{ $option }}" @if(!empty(old($name, $value ?? ''))) selected @endif>{{ $option }}</option>
+    <option value="{{ $option }}" @if(old($name, $value ?? '') === $option) selected @endif>{{ $option }}</option>
     @endforeach
     </select>
     @error($name)

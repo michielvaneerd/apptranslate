@@ -3,8 +3,10 @@
 return [
     'code' => 'Code',
     'create' => 'Create',
+    'edit' => 'Edit',
     'email' => 'Email',
     'login' => 'Login',
+    'logout' => 'Logout',
     'login_description' => 'Enter your email and password to login',
     'mail_greeting' => 'Hello!',
     'mail_ending' => 'Best wishes,',

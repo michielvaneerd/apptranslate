@@ -14,7 +14,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('fontawesome-free/css/all.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/adminlte.min.css') }}">
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
 </head>
 
 <body class="sidebar-mini layout-fixed">
@@ -24,30 +24,24 @@
                 <li class="nav-item">
                     <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
                 </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="index3.html" class="nav-link">Home</a>
-                </li>
             </ul>
             <ul class="navbar-nav ml-auto">
-                @auth()
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="{{ route('logout') }}" class="nav-link">Logout</a>
+                    <a href="{{ route('logout') }}" class="nav-link">{{ __('app.logout') }}</a>
                 </li>
-                @endauth
             </ul>
         </nav>
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <a href="/" class="brand-link">{{ config('app.name') }}</a>
+            <div>
+                <a href="/" class="brand-link">{{ config('app.name') }}</a>
+            </div>
             <div class="sidebar">
                 <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Inactive Page</p>
-                            </a>
-                        </li>
-                    </ul>
+                    <?php
+                    $menuItems = \App\Helpers\Menu::getMenu(auth()->user());
+                    $currentUrl = url()->current();
+                    ?>
+                    <x-menu :items="$menuItems" :currentUrl="$currentUrl" root="true"></x-menu>
                 </nav>
             </div>
         </aside>

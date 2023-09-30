@@ -1,4 +1,7 @@
-<?php extract($table); ?>
+<?php
+extract($table);
+$links = $links ?? [];
+?>
 <table class="table">
     <thead>
         <tr>
@@ -14,7 +17,13 @@
         <tr>
             @foreach($columns as $column)
             <td>
-                {{ $item->$column }}
+                @if(!empty($links[$column]))
+                <a href="{{ $links[$column]($item) }}">
+                    @endif
+                    {{ $item->$column }}
+                    @if(!empty($links[$column]))
+                </a>
+                @endif
             </td>
             @endforeach
         </tr>

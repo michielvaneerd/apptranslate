@@ -8,11 +8,11 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class EmailUnique implements ValidationRule
 {
-    private ?int $userId;
+    private ?User $user;
 
-    public function __construct(int $userId = null)
+    public function __construct(?User $user = null)
     {
-        $this->userId = $userId;
+        $this->user = $user;
     }
 
     /**
@@ -23,8 +23,8 @@ class EmailUnique implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $query = User::where('email_hash', User::hashProperty($value));
-        if (! empty($this->userId)) {
-            $query->where('id', '<>', $this->userId);
+        if (! empty($this->user)) {
+            $query->where('id', '<>', $this->user->id);
         }
         if ($query->exists()) {
             $fail(__('error.exists', ['attribute' => $attribute]));

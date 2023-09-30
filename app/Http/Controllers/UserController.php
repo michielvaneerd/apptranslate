@@ -23,7 +23,12 @@ class UserController extends Controller
         $users = User::all();
         $table = [
             'items' => $users,
-            'columns' => ['id', 'role', 'email'],
+            'columns' => ['id', 'role', 'email', 'email_verified_at', 'tfa_secret_verified_at'],
+            'links' => [
+                'email' => function(User $user) {
+                    return route('users.edit', compact('user'));
+                }
+            ]
         ];
 
         return view('index', [
@@ -36,10 +41,7 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Display form to create new user.
-     */
-    public function create(Request $request): View
+    private function getCreateEdit(Request $request, ?User $user = null)
     {
         $fields = [
             [
@@ -49,6 +51,7 @@ class UserController extends Controller
                 'autofocus' => true,
                 'placeholder' => __('app.email'),
                 'label' => __('app.email'),
+                'value' => optional($user)->email
             ],
             [
                 'type' => 'select',
@@ -56,6 +59,7 @@ class UserController extends Controller
                 'required' => true,
                 'label' => __('app.role'),
                 'options' => ['root', 'admin', 'editor'],
+                'value' => optional($user)->role
             ],
         ];
         $form = [
@@ -64,8 +68,31 @@ class UserController extends Controller
         ];
 
         return view('create-edit', [
-            'title' => __('app.create'),
+            'title' => empty($user) ? __('app.create') : __('app.edit'),
             'form' => $form,
+        ]);
+    }
+
+    /**
+     * Display form to create new user.
+     */
+    public function create(Request $request): View
+    {
+        return $this->getCreateEdit($request);
+    }
+
+    private function validateStoreUpdate(Request $request, ?User $user = null): array
+    {
+        return $request->validate([
+            'email' => [
+                'required',
+                'email',
+                new EmailUnique($user),
+            ],
+            'role' => [
+                'required',
+                Rule::in(User::ROLES),
+            ],
         ]);
     }
 
@@ -74,17 +101,7 @@ class UserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'email' => [
-                'required',
-                'email',
-                new EmailUnique(),
-            ],
-            'role' => [
-                'required',
-                Rule::in(User::ROLES),
-            ],
-        ]);
+        $validated = $this->validateStoreUpdate($request);
         $user = User::create([
             'email' => $validated['email'],
             'role' => $validated['role'],
@@ -100,35 +117,41 @@ class UserController extends Controller
     /**
      * Display form to edit a user.
      */
-    public function edit(Request $request, int $id)
+    public function edit(Request $request, User $user)
     {
+        return $this->getCreateEdit($request, $user);
     }
 
     /**
      * View user.
      */
-    public function view(Request $request, int $id)
+    public function view(Request $request, User $user)
     {
     }
 
     /**
      * Updates user.
      */
-    public function update(Request $request, int $id)
+    public function update(Request $request, User $user)
     {
+        $validated = $this->validateStoreUpdate($request, $user);
+        // TODO: validate email if changed
+        // and check for role change.
+        $user->update($validated);
+        return redirect()->route('users.index');
     }
 
     /**
      * Show delete confirmation.
      */
-    public function delete(Request $request, int $id)
+    public function delete(Request $request, User $user)
     {
     }
 
     /**
      * Deletes a user.
      */
-    public function destroy(Request $request, int $id)
+    public function destroy(Request $request, User $user)
     {
     }
 }
